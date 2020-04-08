@@ -9,9 +9,10 @@ import (
 )
 
 type Url struct {
-	Id      string
-	Criacao string
-	Destino string
+	Id      string `json: "id"`
+	Criacao time.Time `json: "criacao"`
+	Destino string `json: "destino"`
+	Clicks  int    `json: "clicks"`
 }
 
 type Repositorio interface {
@@ -19,6 +20,8 @@ type Repositorio interface {
 	BuscarPorId(id string) *Url
 	BuscarPorUrl(url string) *Url
 	Salvar(url Url) error
+	RegistrarClick(id string)
+	BuscarClicks(id string) int
 }
 
 var repo Repositorio
@@ -55,7 +58,7 @@ func BuscarOuCriarNovaUrl(destino string) (u *Url, nova bool, err error) {
 		return nil, false, err
 	}
 	log.Printf("\n[Encurtador de URL] Iniciando criação de nova URL (Ou busca de já existente)")
-	url := Url{gerarId(), time.Now().Format("2020-03-04 10:58:00"), destino}
+	url := Url{gerarId(), time.Now(), destino, 0}
 	repo.Salvar(url)
 	return &url, true, nil
 }
@@ -79,5 +82,9 @@ func gerarId() string {
 }
 
 func Buscar(id string) *Url {
-	return repo.BuscarPorId(id)
+	url := repo.BuscarPorId(id)
+	return url
+}
+func RegistrarClick(id string) {
+	repo.RegistrarClick(id)
 }
